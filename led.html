@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .name {
+      width: 200px;
+      height: 30px;
+    }
+
+    .switch {
+      width: 100px;
+      height: 100px;
+      margin-top: 10px;
+      margin-left: 50px;
+      background-color: gray;
+    }
+
+    .switch-on {
+      background-color: white;
+      color: black;
+    }
+
+    .switch-off {
+      background-color: black;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>LED灯名称：</h2>
+  <input class="name" type="text">
+  <br>
+  <button class="switch">开关</button>
+  <br>
+  <h3 id="message"></h3>
+  <script>
+    var nameEvent = function () {
+      //获取当前LED灯的名称
+      var name = document.querySelector('.name').value;
+
+      if (name == '') {
+        document.getElementById('message').innerHTML = '请输入名称';
+        return ;
+      }
+      //ajax
+      var xhr = new XMLHttpRequest();
+
+
+      xhr.onreadystatechange = function () {
+        // 通信成功时，状态值为4
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          if (xhr.status === 200) {
+            var res = JSON.parse(xhr.responseText);
+            console.log(res);
+            document.getElementById('message').innerHTML = res.message;
+            if (res.status === "success") {
+              if (res.value == '0') {
+                //led值为0 关闭
+                //开关背景变黑, 应用css样式
+                console.log("led值为0 关闭");
+                document.querySelector('.switch').classList.remove('switch-on');
+                document.querySelector('.switch').classList.add('switch-off');
+                //全局值变为0
+                window.ledValue = 0;
+              } else {
+                //led值为1 开启
+                //开关背景变白
+                document.querySelector('.switch').classList.remove('switch-off');
+                document.querySelector('.switch').classList.add('switch-on');
+                //全局值变为1
+                window.ledValue = 1;
+              }
+            }
+          }
+        } else {
+          //console.error(xhr.statusText);
+        }
+      }
+
+      xhr.onerror = function (e) {
+        //console.error(xhr.statusText);
+      };
+
+      xhr.open('GET', 'http://www.qianty.online/led.php?method=get&name=' + name, true);
+      xhr.send(null);
+    };
+    //当按下回车键时，发送ajax请求
+    document.querySelector('.name').addEventListener('keydown', function(event) {
+        if (event.key === "Enter") {
+            // 调用函数处理回车事件
+            nameEvent();
+        }
+    });
+    //当输入框失去焦点时，发送ajax请求q
+    document.querySelector('.name').addEventListener('blur', nameEvent);
+
+
+
+    //点击开关时，发送ajax请求
+    document.querySelector('.switch').addEventListener('click', function () {
+      var name = document.querySelector('.name').value;
+      //发送请求
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        // 通信成功时，状态值为4
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          if (xhr.status === 200) {
+            var res = JSON.parse(xhr.responseText);
+            console.log(res);
+            document.getElementById('message').innerHTML = res.message;
+            if (res.status === "success") {
+              if (res.value == 0) {
+                // 开关背景变黑
+                document.querySelector('.switch').classList.remove('switch-on');
+                document.querySelector('.switch').classList.add('switch-off');
+              } else {
+                // 开关背景变白
+                document.querySelector('.switch').classList.remove('switch-off');
+                document.querySelector('.switch').classList.add('switch-on');
+              }
+            }
+          }
+        } else {
+          //console.error(xhr.statusText);
+        }
+      }
+
+      xhr.onerror = function (e) {
+        //console.error(xhr.statusText);
+      };
+
+      if(window.ledValue == undefined) {
+        document.getElementById('message').innerHTML = '请输入名称';
+        return;
+      }
+      if (window.ledValue == 0) {
+        ledValue = 1;
+      } else {
+        ledValue = 0;
+      }
+      xhr.open('GET', 'http://www.qianty.online/led.php?method=set&name=' + name + '&value=' + ledValue, true);
+      xhr.send(null);
+
+
+    });
+
+
+  </script>
+</body>
+
+</html>
