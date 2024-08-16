@@ -12,7 +12,7 @@
   $data = null;
 
   //连接数据库
-  $conn = mysqli_connect('localhost', 'serzf85ss8z', 'qty980522', 'serzf85ss8z');
+  $conn = mysqli_connect('ip address', 'username', 'password', 'database');
   if (!$conn) {
     die('连接失败: ' . mysqli_connect_error());
   }
